@@ -1,22 +1,24 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-from typing import List
+from typing import Any, Dict, List
 import uuid
 
 app = FastAPI()
 
+class ItemCreate(BaseModel):
+    data: Dict[str, Any]
+
 class JSONItem(BaseModel):
     id: str
-    data: dict
+    data: Dict[str, Any]
 
-# In-memory storage (puoi sostituire con un database)
 db: List[JSONItem] = []
 
 @app.post("/items/", response_model=JSONItem)
-def create_item(data: dict):
-    item = JSONItem(id=str(uuid.uuid4()), data=data)
-    db.append(item)
-    return item
+def create_item(item: ItemCreate):
+    new_item = JSONItem(id=str(uuid.uuid4()), data=item.data)
+    db.append(new_item)
+    return new_item
 
 @app.get("/items/", response_model=List[JSONItem])
 def get_items():
